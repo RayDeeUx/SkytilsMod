@@ -69,6 +69,16 @@ class SlayerBossComponent<T : StandardSlayer>(slayer: State<T?>, type: String) :
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWIwOWEzNzUyNTEwZTkxNGIwYmRjOTA5NmIzOTJiYjM1OWY3YThlOGE5NTY2YTAyZTdmNjZmYWZmOGQ2Zjg5ZSJ9fX0=",
                 "c4880012-4860-43d2-aaaf-51dfc00a8399"
             )
+            "vampire" -> ItemUtil.setSkullTexture(
+                ItemStack(Items.skull, it.first, 3),
+                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWFhMjllYTk2MTc1N2RjM2M5MGJmYWJmMzAyYzVhYmU5ZDMwOGZiNGE3ZDM4NjRlNTc4OGFkMmNjOTE2MGFhMiJ9fX0=",
+                "b43d7457-9da4-408b-a9fb-51239022cec9"
+            )
+            "blaze" -> ItemUtil.setSkullTexture(
+                ItemStack(Items.skull, it.first, 3),
+                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjIwNjU3ZTI0YjU2ZTFiMmY4ZmMyMTlkYTFkZTc4OGMwYzI0ZjM2Mzg4YjFhNDA5ZDBjZDJkOGRiYTQ0YWEzYiJ9fX0=",
+                "b43d7457-9da4-408b-a9fb-51239022cec9"
+            )
             else -> ItemStack(Items.skull, -1, 1)
         }
     }

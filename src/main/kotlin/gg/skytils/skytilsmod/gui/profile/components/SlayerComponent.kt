@@ -38,10 +38,13 @@ class SlayerComponent(profileState: State<Member?>) : UIContainer() {
     val tara = slayers.map { it?.tarantula }
     val sven = slayers.map { it?.sven }
     val eman = slayers.map { it?.enderman }
-    val totalXp = rev.zip(tara).zip(sven.zip(eman)).map { stuff ->
+    val vamp = slayers.map { it?.vampire }
+    val blaz = slayers.map { it?.blaze }
+    val totalXp = rev.zip(tara).zip(sven.zip(eman).zip(vamp.zip(blaz))).map { stuff ->
         val (rev, tara) = stuff.first
         val (sven, eman) = stuff.second
-        0L + (rev?.xp ?: 0) + (tara?.xp ?: 0) + (sven?.xp ?: 0) + (eman?.xp ?: 0)
+        val (vamp, blaz) = stuff.third
+        0L + (rev?.xp ?: 0) + (tara?.xp ?: 0) + (sven?.xp ?: 0) + (eman?.xp ?: 0) + (vamp?.xp ?: 0) + (blaz?.xp ?: 0)
     }
 
 
@@ -78,6 +81,18 @@ class SlayerComponent(profileState: State<Member?>) : UIContainer() {
     } childOf slayersContainer
 
     val end by SlayerBossComponent(eman, "enderman").constrain {
+        x = CramSiblingConstraint(10f)
+        y = CramSiblingConstraint(5f)
+        color = VigilancePalette.getBackground().withAlpha(120).constraint
+    } childOf slayersContainer
+
+    val vam by SlayerBossComponent(vamp, "vampire").constrain {
+        x = CramSiblingConstraint(10f)
+        y = CramSiblingConstraint(5f)
+        color = VigilancePalette.getBackground().withAlpha(120).constraint
+    } childOf slayersContainer
+
+    val bla by SlayerBossComponent(blaz, "blaze").constrain {
         x = CramSiblingConstraint(10f)
         y = CramSiblingConstraint(5f)
         color = VigilancePalette.getBackground().withAlpha(120).constraint
