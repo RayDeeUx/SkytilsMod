@@ -1687,6 +1687,21 @@ object Config : Vigilant(
     var golemSpawnTimer = false
 
     @Property(
+        type = PropertyType.SWITCH, name = "Trophy Fishing Progress",
+        description = "Displays the trophy fishes you're missing. Requires visiting or calling Odger.",
+        category = "Miscellaneous", subcategory = "Other"
+    )
+    var trophyFishingProgress = false
+
+    @Property(
+        type = PropertyType.SWITCH, name = "Include Undiscovered Trophies",
+        description = "Includes your undiscovered Trophy Fishes.",
+        category = "Miscellaneous", subcategory = "Other",
+        searchTags = ["Odger"]
+    )
+    var noProgressTrophies = false
+
+    @Property(
         type = PropertyType.SWITCH, name = "Players in Range Display",
         description = "Shows the amount of players within a 30 block radius.",
         category = "Miscellaneous", subcategory = "Other",
@@ -3017,6 +3032,8 @@ object Config : Vigilant(
         addDependency("includeModifiersInSellValue", "containerSellValue")
 
         addDependency("assumeWitherImpact", "witherShieldCooldown")
+
+        addDependency("noProgressTrophies", "trophyFishingProgress")
 
         registerListener("protectItemBINThreshold") { _: String ->
             tickTimer(1) {
