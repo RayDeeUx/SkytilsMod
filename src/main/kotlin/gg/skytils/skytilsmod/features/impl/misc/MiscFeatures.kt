@@ -485,7 +485,7 @@ object MiscFeatures {
                     getSkyBlockItemID(item)?.substringAfterLast("CATACOMBS_PASS_")?.toIntOrNull()?.minus(3)?.toString()
                         ?: ""
             }
-            if (name.isNotEmpty() && getItemLore(item).isNotEmpty()) {
+            if (name.isNotEmpty() && getItemLore(item).isNotEmpty() && (getSkyBlockItemID(item) == null || getExtraAttributes(item)?.hasKey("uuid") == false)) {
                 for (line in getItemLore(item)) {
                     if (percentageItemLoreRegex.matches(line)) {
                         val match = percentageItemLoreRegex.matchEntire(line) ?: return
