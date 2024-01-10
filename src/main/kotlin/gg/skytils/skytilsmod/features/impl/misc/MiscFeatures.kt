@@ -33,6 +33,7 @@ import gg.skytils.skytilsmod.mixins.transformers.accessors.AccessorEntityArmorst
 import gg.skytils.skytilsmod.mixins.transformers.accessors.AccessorWorldInfo
 import gg.skytils.skytilsmod.utils.*
 import gg.skytils.skytilsmod.utils.ItemUtil.getExtraAttributes
+import gg.skytils.skytilsmod.utils.ItemUtil.getItemLore
 import gg.skytils.skytilsmod.utils.ItemUtil.getSkyBlockItemID
 import gg.skytils.skytilsmod.utils.NumberUtil.romanToDecimal
 import gg.skytils.skytilsmod.utils.NumberUtil.roundToPrecision
@@ -98,6 +99,7 @@ object MiscFeatures {
     )
     private val hubSpawnPoint = BlockPos(-2, 70, -69)
     private val bestiaryTitleRegex = Regex("(?:\\(\\d+/\\d+\\) )?(?:Bestiary ➜ (?!Fishing)|Fishing ➜ )|Search Results")
+    private val percentageItemLoreRegex = Regex("[\\S §?]*(?:§.)+(?<percent>[0-9]+)(?:\\.[0-9]+)?(?:§.)*%[\\S §?]*")
 
     init {
         GolemSpawnTimerElement()
@@ -482,6 +484,14 @@ object MiscFeatures {
                 stackTip =
                     getSkyBlockItemID(item)?.substringAfterLast("CATACOMBS_PASS_")?.toIntOrNull()?.minus(3)?.toString()
                         ?: ""
+            }
+            if (name.isNotEmpty() && getItemLore(item).isNotEmpty()) {
+                for (line in getItemLore(item)) {
+                    if (percentageItemLoreRegex.matches(line)) {
+                        val match = percentageItemLoreRegex.matchEntire(line) ?: return
+                        stackTip = "${match.groups["percent"]}"
+                    }
+                }
             }
         }
 
