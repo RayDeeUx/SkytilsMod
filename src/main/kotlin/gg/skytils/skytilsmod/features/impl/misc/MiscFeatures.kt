@@ -489,7 +489,7 @@ object MiscFeatures {
                 for (line in getItemLore(item)) {
                     if (percentageItemLoreRegex.matches(line)) {
                         val match = percentageItemLoreRegex.matchEntire(line) ?: return
-                        stackTip = "${match.groups["percent"]}"
+                        stackTip = "${match.groups["percent"]?.value}"
                     }
                 }
             }
