@@ -396,15 +396,13 @@ object MiscFeatures {
                         return
                     }
                 }
-            } else if (bzAHTitleRegex.matches(chestName)) {
-                if (Skytils.config.claimOwnAHBZOnly) {
-                    for (line in ItemUtil.getItemLore(item)) {
-                        if (bzAHAuthorRegex.matches(line)) {
-                            val matches = bzAHAuthorRegex.find(line) ?: return
-                            if (matches.groups["username"]?.value ?: "" != mc.thePlayer.name) {
-                                event.isCanceled = true
-                                return
-                            }
+            } else if (bzAHTitleRegex.matches(chestName) && Skytils.config.claimOwnAHBZOnly) {
+                for (line in ItemUtil.getItemLore(item)) {
+                    if (bzAHAuthorRegex.matches(line)) {
+                        val matches = bzAHAuthorRegex.find(line) ?: return
+                        if (matches.groups["username"]?.value ?: "" != mc.thePlayer.name) {
+                            event.isCanceled = true
+                            return
                         }
                     }
                 }
