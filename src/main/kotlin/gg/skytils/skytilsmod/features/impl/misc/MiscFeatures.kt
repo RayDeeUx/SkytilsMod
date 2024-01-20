@@ -102,6 +102,8 @@ object MiscFeatures {
     )
     private val hubSpawnPoint = BlockPos(-2, 70, -69)
     private val bestiaryTitleRegex = Regex("(?:\\(\\d+/\\d+\\) )?(?:Bestiary ➜ (?!Fishing)|Fishing ➜ )|Search Results")
+    private val bzAHAuthorRegex = Regex("(?:§.)*(?:By|Seller):(?:§.)*(?: (?:§.)*\\[[\\S]+(?:(?:§.)*\\+(?:§.)*)?](?:§.)*)? (?:§.)*(?<username>[a-zA-Z0-9_]{2,16})")
+    private val bzAHTitleRegex = Regex("(?:Co.?op )?(?:Bazaar(?: Co.?op)? Orders|Manage(?: Co.?op)? Auctions)")
 
     init {
         GolemSpawnTimerElement()
@@ -376,12 +378,13 @@ object MiscFeatures {
         if (event.container is ContainerChest) {
             val slot = event.slot ?: return
             val item = slot.stack ?: return
+            val chestName = event.chestName
             if (Skytils.config.coopAddConfirmation && item.item == Items.diamond && item.displayName == "§aCo-op Request") {
                 event.isCanceled = true
                 UChat.chat("$failPrefix §c§lBe careful! Skytils stopped you from giving a player full control of your island!")
             }
             val extraAttributes = getExtraAttributes(item)
-            if (event.chestName == "Ophelia") {
+            if (chestName == "Ophelia") {
                 if (Skytils.config.dungeonPotLock > 0) {
                     if (slot.inventory === mc.thePlayer.inventory || equalsOneOf(slot.slotNumber, 49, 53)) return
                     if (item.item !== Items.potionitem || extraAttributes == null || !extraAttributes.hasKey("potion_level")) {
@@ -391,6 +394,18 @@ object MiscFeatures {
                     if (extraAttributes.getInteger("potion_level") != Skytils.config.dungeonPotLock) {
                         event.isCanceled = true
                         return
+                    }
+                }
+            } else if (bzAHTitleRegex.matches(chestName)) {
+                if (Skytils.config.claimOwnAHBZOnly) {
+                    for (line in ItemUtil.getItemLore(item)) {
+                        if (bzAHAuthorRegex.matches(line)) {
+                            val matches = bzAHAuthorRegex.find(line) ?: return
+                            if (matches.groups["username"]?.value ?: "" != mc.thePlayer.name) {
+                                event.isCanceled = true
+                                return
+                            }
+                        }
                     }
                 }
             }
