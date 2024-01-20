@@ -374,36 +374,34 @@ object MiscFeatures {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onSlotClick(event: SlotClickEvent) {
-        if (!Utils.inSkyblock) return
-        if (event.container is ContainerChest) {
-            val slot = event.slot ?: return
-            val item = slot.stack ?: return
-            val chestName = event.chestName
-            if (Skytils.config.coopAddConfirmation && item.item == Items.diamond && item.displayName == "§aCo-op Request") {
-                event.isCanceled = true
-                UChat.chat("$failPrefix §c§lBe careful! Skytils stopped you from giving a player full control of your island!")
-            }
-            val extraAttributes = getExtraAttributes(item)
-            if (chestName == "Ophelia") {
-                if (Skytils.config.dungeonPotLock > 0) {
-                    if (slot.inventory === mc.thePlayer.inventory || equalsOneOf(slot.slotNumber, 49, 53)) return
-                    if (item.item !== Items.potionitem || extraAttributes == null || !extraAttributes.hasKey("potion_level")) {
-                        event.isCanceled = true
-                        return
-                    }
-                    if (extraAttributes.getInteger("potion_level") != Skytils.config.dungeonPotLock) {
-                        event.isCanceled = true
-                        return
-                    }
+        if (!Utils.inSkyblock && event.container !is ContainerChest) return
+        val slot = event.slot ?: return
+        val item = slot.stack ?: return
+        val chestName = event.chestName
+        if (Skytils.config.coopAddConfirmation && item.item == Items.diamond && item.displayName == "§aCo-op Request") {
+            event.isCanceled = true
+            UChat.chat("$failPrefix §c§lBe careful! Skytils stopped you from giving a player full control of your island!")
+        }
+        val extraAttributes = getExtraAttributes(item)
+        if (chestName == "Ophelia") {
+            if (Skytils.config.dungeonPotLock > 0) {
+                if (slot.inventory === mc.thePlayer.inventory || equalsOneOf(slot.slotNumber, 49, 53)) return
+                if (item.item !== Items.potionitem || extraAttributes == null || !extraAttributes.hasKey("potion_level")) {
+                    event.isCanceled = true
+                    return
                 }
-            } else if (bzAHTitleRegex.matches(chestName) && Skytils.config.claimOwnAHBZOnly) {
-                for (line in ItemUtil.getItemLore(item)) {
-                    if (bzAHAuthorRegex.matches(line.stripControlCodes())) {
-                        val matches = bzAHAuthorRegex.find(line) ?: return
-                        if (matches.groups["username"]?.value != mc.thePlayer.name) {
-                            event.isCanceled = true
-                            return
-                        }
+                if (extraAttributes.getInteger("potion_level") != Skytils.config.dungeonPotLock) {
+                    event.isCanceled = true
+                    return
+                }
+            }
+        } else if (bzAHTitleRegex.matches(chestName) && Skytils.config.claimOwnAHBZOnly) {
+            for (line in ItemUtil.getItemLore(item)) {
+                if (bzAHAuthorRegex.matches(line.stripControlCodes())) {
+                    val matches = bzAHAuthorRegex.find(line) ?: return
+                    if (matches.groups["username"]?.value != mc.thePlayer.name) {
+                        event.isCanceled = true
+                        return
                     }
                 }
             }
