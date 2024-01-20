@@ -102,7 +102,7 @@ object MiscFeatures {
     )
     private val hubSpawnPoint = BlockPos(-2, 70, -69)
     private val bestiaryTitleRegex = Regex("(?:\\(\\d+/\\d+\\) )?(?:Bestiary ➜ (?!Fishing)|Fishing ➜ )|Search Results")
-    private val bzAHAuthorRegex = Regex("(?:§.)*(?:By|Seller):(?:§.)*(?: (?:§.)*\\[[\\S]+(?:(?:§.)*\\+(?:§.)*)?](?:§.)*)? (?:§.)*(?<username>[a-zA-Z0-9_]{2,16})")
+    private val bzAHAuthorRegex = Regex("(?:By|Seller):(?: \\[[\\S]+\\+*\\])? (?<username>[a-zA-Z0-9_]{2,16})")
     private val bzAHTitleRegex = Regex("(?:Co.?op )?(?:Bazaar(?: Co.?op)? Orders|Manage(?: Co.?op)? Auctions)")
 
     init {
@@ -398,7 +398,7 @@ object MiscFeatures {
                 }
             } else if (bzAHTitleRegex.matches(chestName) && Skytils.config.claimOwnAHBZOnly) {
                 for (line in ItemUtil.getItemLore(item)) {
-                    if (bzAHAuthorRegex.matches(line)) {
+                    if (bzAHAuthorRegex.matches(line.stripControlCodes())) {
                         val matches = bzAHAuthorRegex.find(line) ?: return
                         if (matches.groups["username"]?.value ?: "" != mc.thePlayer.name) {
                             event.isCanceled = true
