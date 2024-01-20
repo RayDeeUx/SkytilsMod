@@ -400,7 +400,7 @@ object MiscFeatures {
                 for (line in ItemUtil.getItemLore(item)) {
                     if (bzAHAuthorRegex.matches(line.stripControlCodes())) {
                         val matches = bzAHAuthorRegex.find(line) ?: return
-                        if (matches.groups["username"]?.value ?: "" != mc.thePlayer.name) {
+                        if (matches.groups["username"]?.value != mc.thePlayer.name) {
                             event.isCanceled = true
                             return
                         }
