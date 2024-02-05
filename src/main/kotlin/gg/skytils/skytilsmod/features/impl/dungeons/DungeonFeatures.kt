@@ -34,6 +34,7 @@ import gg.skytils.skytilsmod.mixins.transformers.accessors.AccessorEnumDyeColor
 import gg.skytils.skytilsmod.utils.*
 import gg.skytils.skytilsmod.utils.Utils.equalsOneOf
 import gg.skytils.skytilsmod.utils.graphics.ScreenRenderer
+import gg.skytils.skytilsmod.utils.graphics.SmartFontRenderer
 import gg.skytils.skytilsmod.utils.graphics.SmartFontRenderer.TextAlignment
 import gg.skytils.skytilsmod.utils.graphics.colors.CommonColors
 import kotlinx.coroutines.Job
@@ -87,12 +88,6 @@ object DungeonFeatures {
         "aim"
     )
     var dungeonFloor: String? = null
-        set(value) {
-            field = value
-            dungeonFloorNumber = value?.drop(1)?.ifEmpty { "0" }?.toIntOrNull()
-        }
-    var dungeonFloorNumber: Int? = null
-        private set
     var hasBossSpawned = false
     private var isInTerracottaPhase = false
     private var terracottaEndTime = -1.0
@@ -125,7 +120,6 @@ object DungeonFeatures {
     )
 
     init {
-        DungeonSecretDisplay
         LividGuiElement()
         SpiritBearSpawnTimer()
     }
@@ -182,14 +176,15 @@ object DungeonFeatures {
         if (event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
         if (Utils.inDungeons) {
             if (dungeonFloor == null) {
-                ScoreboardUtil.sidebarLines.find {
-                    it.contains("The Catacombs (")
-                }?.let {
-                    dungeonFloor = it.substringAfter("(").substringBefore(")")
-                    ScoreCalculation.floorReq.set(
-                        ScoreCalculation.floorRequirements[dungeonFloor]
-                            ?: ScoreCalculation.floorRequirements["default"]!!
-                    )
+                for (line in ScoreboardUtil.sidebarLines) {
+                    if (line.contains("The Catacombs (")) {
+                        dungeonFloor = line.substringAfter("(").substringBefore(")")
+                        ScoreCalculation.floorReq.set(
+                            ScoreCalculation.floorRequirements[dungeonFloor]
+                                ?: ScoreCalculation.floorRequirements["default"]!!
+                        )
+                        break
+                    }
                 }
             }
             if (!hasClearedText) {
@@ -383,7 +378,7 @@ object DungeonFeatures {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
     fun onChat(event: ClientChatReceivedEvent) {
-        if (!Utils.inSkyblock || event.type == 2.toByte()) return
+        if (!Utils.inSkyblock) return
         val unformatted = event.message.unformattedText.stripControlCodes()
         if (Utils.inDungeons) {
             if (Skytils.config.autoCopyFailToClipboard) {
@@ -833,57 +828,6 @@ object DungeonFeatures {
 
         override val toggled: Boolean
             get() = Skytils.config.findCorrectLivid
-
-        init {
-            Skytils.guiManager.registerElement(this)
-        }
-    }
-
-    object DungeonSecretDisplay : GuiElement("Dungeon Secret Display", x = 0.05f, y = 0.4f) {
-        var secrets = -1
-        var maxSecrets = -1
-
-        override fun render() {
-            if (toggled && Utils.inDungeons && secrets > 0 && maxSecrets > 0) {
-                val leftAlign = scaleX < sr.scaledWidth / 2f
-                val alignment = if (leftAlign) TextAlignment.LEFT_RIGHT else TextAlignment.RIGHT_LEFT
-                val color = when (secrets / maxSecrets.toDouble()) {
-                    in 0.0..0.5 -> CommonColors.RED
-                    in 0.5..0.75 -> CommonColors.YELLOW
-                    else -> CommonColors.GREEN
-                }
-
-                ScreenRenderer.fontRenderer.drawString(
-                    "Secrets: ${secrets}/${maxSecrets}",
-                    if (leftAlign) 0f else 0f + width,
-                    0f,
-                    color,
-                    alignment,
-                    textShadow
-                )
-            }
-        }
-
-        override fun demoRender() {
-            val leftAlign = scaleX < sr.scaledWidth / 2f
-            val alignment = if (leftAlign) TextAlignment.LEFT_RIGHT else TextAlignment.RIGHT_LEFT
-            ScreenRenderer.fontRenderer.drawString(
-                "Secrets: 0/0",
-                if (leftAlign) 0f else 0f + width,
-                0f,
-                CommonColors.WHITE,
-                alignment,
-                textShadow
-            )
-        }
-
-        override val height: Int
-            get() = ScreenRenderer.fontRenderer.FONT_HEIGHT
-        override val width: Int
-            get() = ScreenRenderer.fontRenderer.getStringWidth("Secrets: 0/0")
-
-        override val toggled: Boolean
-            get() = Skytils.config.dungeonSecretDisplay
 
         init {
             Skytils.guiManager.registerElement(this)

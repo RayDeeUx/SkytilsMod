@@ -21,39 +21,34 @@ import com.google.common.collect.ComparisonChain
 import com.google.common.collect.Ordering
 import gg.skytils.skytilsmod.Skytils.Companion.mc
 import net.minecraft.client.network.NetworkPlayerInfo
-import net.minecraft.scoreboard.ScorePlayerTeam
 import net.minecraft.world.WorldSettings
 
 val NetworkPlayerInfo.text: String
-    get() = displayName?.formattedText ?: ScorePlayerTeam.formatPlayerName(
-        playerTeam,
-        gameProfile.name
-    )
-
+    get() = mc.ingameGUI.tabList.getPlayerName(this)
 
 object TabListUtils {
     private val playerInfoOrdering = object : Ordering<NetworkPlayerInfo>() {
-        override fun compare(p1: NetworkPlayerInfo?, p2: NetworkPlayerInfo?): Int {
-            return when {
-                p1 != null && p2 != null -> {
-                    ComparisonChain.start().compareTrueFirst(
-                        p1.gameType != WorldSettings.GameType.SPECTATOR,
-                        p2.gameType != WorldSettings.GameType.SPECTATOR
+        override fun compare(p_compare_1_: NetworkPlayerInfo?, p_compare_2_: NetworkPlayerInfo?): Int {
+            val scorePlayerTeam = p_compare_1_?.playerTeam
+            val scorePlayerTeam1 = p_compare_2_?.playerTeam
+            if (p_compare_1_ != null) {
+                if (p_compare_2_ != null) {
+                    return ComparisonChain.start().compareTrueFirst(
+                        p_compare_1_.gameType != WorldSettings.GameType.SPECTATOR,
+                        p_compare_2_.gameType != WorldSettings.GameType.SPECTATOR
                     ).compare(
-                        p1.playerTeam?.registeredName ?: "",
-                        p2.playerTeam?.registeredName ?: ""
-                    ).compare(p1.gameProfile.name, p2.gameProfile.name).result()
+                        if (scorePlayerTeam != null) scorePlayerTeam.registeredName else "",
+                        if (scorePlayerTeam1 != null) scorePlayerTeam1.registeredName else ""
+                    ).compare(p_compare_1_.gameProfile.name, p_compare_2_.gameProfile.name).result()
                 }
-
-                p1 == null -> -1
-                else -> 0
+                return 0
             }
+            return -1
         }
     }
     var tabEntries: List<Pair<NetworkPlayerInfo, String>> = emptyList()
-    fun fetchTabEntries(): List<NetworkPlayerInfo> = mc.thePlayer?.let {
-        playerInfoOrdering.immutableSortedCopy(
+    fun fetchTabEntries(): List<NetworkPlayerInfo> =
+        if (mc.thePlayer == null) emptyList() else playerInfoOrdering.sortedCopy(
             mc.thePlayer.sendQueue.playerInfoMap
         )
-    } ?: emptyList()
 }

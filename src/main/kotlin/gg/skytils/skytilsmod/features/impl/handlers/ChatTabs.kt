@@ -50,7 +50,7 @@ object ChatTabs {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onChat(event: PacketEvent.ReceiveEvent) {
-        if (!Utils.isOnHypixel || !Skytils.config.chatTabs || event.packet !is S02PacketChat || event.packet.type == 2.toByte()) return
+        if (!Utils.isOnHypixel || !Skytils.config.chatTabs || event.packet !is S02PacketChat) return
 
         val style = event.packet.chatComponent.chatStyle
         style as ExtensionChatStyle

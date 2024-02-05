@@ -117,7 +117,7 @@ object MiningFeatures {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
     fun onChat(event: ClientChatReceivedEvent) {
-        if (!Utils.inSkyblock || event.type == 2.toByte()) return
+        if (!Utils.inSkyblock || event.type.toInt() == 2) return
         val formatted = event.message.formattedText
         val unformatted = event.message.unformattedText.stripControlCodes()
         if (Skytils.config.powerGhastPing) {

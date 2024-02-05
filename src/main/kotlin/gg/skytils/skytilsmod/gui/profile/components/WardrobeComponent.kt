@@ -26,17 +26,19 @@ import gg.essential.elementa.constraints.*
 import gg.essential.elementa.dsl.*
 import gg.essential.elementa.state.State
 import gg.essential.vigilance.gui.VigilancePalette
-import gg.skytils.hypixel.types.skyblock.Member
 import gg.skytils.skytilsmod.gui.constraints.FixedChildBasedRangeConstraint
 import gg.skytils.skytilsmod.gui.profile.states.alwaysMap
-import gg.skytils.skytilsmod.utils.toMCItems
-import net.minecraft.item.ItemStack
+import skytils.hylin.skyblock.Member
+import skytils.hylin.skyblock.item.Inventory
 
 class WardrobeComponent(val profileState: State<Member?>) : UIContainer() {
 
     private val armor =
         ArmorComponent(profileState.map { p ->
-            p?.inventory?.armor?.toMCItems()?.asReversed() ?: emptyList()
+            p?.armor.also { it?.items?.reverse() } ?: Inventory(
+                "armor",
+                ArrayList(4)
+            )
         }, false).constrain {
             width = FixedChildBasedRangeConstraint()
             height = ChildBasedMaxSizeConstraint()
@@ -53,18 +55,19 @@ class WardrobeComponent(val profileState: State<Member?>) : UIContainer() {
         profileState.onSetValue { profile ->
             Window.enqueueRenderOperation {
                 wardrobeContainer.clearChildren()
-                profile?.inventory?.wardrobe?.toMCItems()?.run {
+                profile?.wardrobe?.items?.run {
                     (0..<size / 4).map { slot ->
                         val page = slot / 9
                         profileState.alwaysMap { prof ->
-                            prof?.inventory?.wardrobe?.toMCItems()?.slice(
-                                (0..3).map {
-                                    it * 9 + slot % 9 + page * 36
-                                }
-                            ) ?: ArrayList(4)
+                            Inventory(
+                                "Wardrobe slot $slot",
+                                prof?.wardrobe?.items?.slice((0..3).map { it * 9 + slot % 9 + page * 36 })
+                                    ?.toMutableList()
+                                    ?: ArrayList(4)
+                            )
                         }
                     }.forEach { state ->
-                        if (state.get().any { it == null }) return@forEach
+                        if (state.get().items.any { it == null }) return@forEach
                         ArmorComponent(state, true).constrain {
                             x = CramSiblingConstraint(2f)
                             y = CramSiblingConstraint(2f)
@@ -94,23 +97,25 @@ class WardrobeComponent(val profileState: State<Member?>) : UIContainer() {
 
     }
 
-    class ArmorComponent(invState: State<List<ItemStack?>>, val vertical: Boolean) : UIContainer() {
-        private var invState: State<List<ItemStack?>> = invState.also {
+    class ArmorComponent(invState: State<Inventory>, val vertical: Boolean) : UIContainer() {
+        private var invState: State<Inventory> = invState.also {
             it.onSetValue(::parseSlots)
         }
 
-        fun bindInv(newState: State<List<ItemStack?>>) = apply {
+        fun bindInv(newState: State<Inventory>) = apply {
             invState = newState
             invState.onSetValue(::parseSlots)
         }
 
-        fun parseSlots(inv: List<ItemStack?>) = Window.enqueueRenderOperation {
+        fun parseSlots(inv: Inventory) = Window.enqueueRenderOperation {
             clearChildren()
-            for (i in 0..3) {
-                insertChildAt(SlotComponent(inv.getOrNull(i)).constrain {
-                    x = if (vertical) 0.pixels else SiblingConstraint(2f)
-                    y = if (vertical) SiblingConstraint(2f) else 0.pixels
-                }, children.size)
+            inv.run {
+                items.forEach { item ->
+                    insertChildAt(SlotComponent(item?.asMinecraft).constrain {
+                        x = if (vertical) 0.pixels else SiblingConstraint(2f)
+                        y = if (vertical) SiblingConstraint(2f) else 0.pixels
+                    }, children.size)
+                }
             }
         }
     }

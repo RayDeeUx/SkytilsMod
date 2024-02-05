@@ -26,9 +26,9 @@ import gg.essential.elementa.constraints.CenterConstraint
 import gg.essential.elementa.dsl.*
 import gg.essential.elementa.state.State
 import gg.essential.vigilance.gui.VigilancePalette
-import net.minecraft.item.ItemStack
+import skytils.hylin.skyblock.item.Inventory
 
-class InventoryComponent(val inv: State<List<ItemStack?>?>) : UIContainer() {
+class InventoryComponent(val inv: State<Inventory?>) : UIContainer() {
     init {
         inv.onSetValue(::parseInv)
         UIRoundedRectangle(5f).constrain {
@@ -42,11 +42,11 @@ class InventoryComponent(val inv: State<List<ItemStack?>?>) : UIContainer() {
         } childOf this
     }
 
-    fun parseInv(inventory: List<ItemStack?>?) = Window.enqueueRenderOperation {
+    fun parseInv(inventory: Inventory?) = Window.enqueueRenderOperation {
         clearChildren()
         inventory?.run {
-            for ((i, item) in withIndex()) {
-                addChild(SlotComponent(item).constrain {
+            for ((i, item) in items.withIndex()) {
+                addChild(SlotComponent(item?.asMinecraft).constrain {
                     x = ((i % 9) * (16 + 2)).pixels
                     y = ((i / 9) * (16 + 2)).pixels
                 })

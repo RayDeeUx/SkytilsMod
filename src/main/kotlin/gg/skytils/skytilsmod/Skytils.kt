@@ -21,6 +21,7 @@ package gg.skytils.skytilsmod
 import gg.essential.api.EssentialAPI
 import gg.essential.universal.UChat
 import gg.essential.universal.UKeyboard
+import gg.skytils.event.Events
 import gg.skytils.skytilsmod.commands.impl.*
 import gg.skytils.skytilsmod.commands.stats.impl.CataCommand
 import gg.skytils.skytilsmod.commands.stats.impl.SlayerCommand
@@ -99,16 +100,13 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.network.FMLNetworkEvent
+import skytils.hylin.HylinAPI
 import sun.misc.Unsafe
 import java.io.File
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.InetAddress
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 import kotlin.coroutines.CoroutineContext
-import kotlin.math.abs
 
 @Mod(
     modid = Skytils.MOD_ID,
@@ -174,6 +172,10 @@ class Skytils {
 
         override val coroutineContext: CoroutineContext = dispatcher + SupervisorJob() + CoroutineName("Skytils")
 
+        val hylinAPI by lazy {
+            HylinAPI("", false, this, HylinConnectionHandler, "https://hypixel.skytils.gg")
+        }
+
         val deobfEnvironment by lazy {
             Launch.blackboard.getOrDefault("fml.deobfuscatedEnvironment", false) as Boolean
         }
@@ -230,8 +232,6 @@ class Skytils {
         const val prefix = "§9§lSkytils §8»"
         const val successPrefix = "§a§lSkytils §8»"
         const val failPrefix = "§c§lSkytils §8»"
-
-        var trustClientTime = false
     }
 
     @Mod.EventHandler
@@ -413,8 +413,6 @@ class Skytils {
                 UChat.chat("$prefix §fYou are on a development version of Skytils. Change your update channel to pre-release to get notified of new updates.")
             }
         }
-
-        checkSystemTime()
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -584,36 +582,6 @@ class Skytils {
         if (old is AccessorGuiStreamUnavailable) {
             if (config.twitchFix && event.gui == null && !(Utils.inSkyblock && old.parentScreen is GuiGameOver)) {
                 event.gui = old.parentScreen
-            }
-        }
-    }
-
-    private fun checkSystemTime() {
-        IO.launch {
-            DatagramSocket().use { socket ->
-                val address = InetAddress.getByName("time.nist.gov")
-                val buffer = NtpMessage().toByteArray()
-                var packet = DatagramPacket(buffer, buffer.size, address, 123)
-                socket.send(packet)
-                packet = DatagramPacket(buffer, buffer.size)
-
-                val destinationTimestamp = NtpMessage.now()
-                val msg = NtpMessage(packet.data)
-
-                val localClockOffset =
-                    ((msg.receiveTimestamp - msg.originateTimestamp) +
-                            (msg.transmitTimestamp - destinationTimestamp)) / 2
-
-                println("Got local clock offset: $localClockOffset")
-                if (abs(localClockOffset) > 3) {
-                    if (ModChecker.canShowNotifications) {
-                        EssentialAPI.getNotifications().push("Skytils", "Your system time is inaccurate.", 3f)
-                    } else {
-                        UChat.chat("$prefix §fYour system time appears to be inaccurate. Please sync your system time to avoid issues with Skytils.")
-                    }
-                } else {
-                    trustClientTime = true
-                }
             }
         }
     }

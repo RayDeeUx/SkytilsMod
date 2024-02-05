@@ -21,10 +21,10 @@ import gg.essential.universal.UMatrixStack
 import gg.skytils.skytilsmod.Skytils
 import gg.skytils.skytilsmod.Skytils.Companion.mc
 import gg.skytils.skytilsmod.core.structure.GuiElement
-import gg.skytils.skytilsmod.features.impl.dungeons.DungeonFeatures.dungeonFloorNumber
 import gg.skytils.skytilsmod.utils.RenderUtil
 import gg.skytils.skytilsmod.utils.Utils
 import gg.skytils.skytilsmod.utils.graphics.ScreenRenderer
+import gg.skytils.skytilsmod.utils.graphics.SmartFontRenderer
 import gg.skytils.skytilsmod.utils.graphics.SmartFontRenderer.TextAlignment
 import gg.skytils.skytilsmod.utils.graphics.colors.CommonColors
 import gg.skytils.skytilsmod.utils.stripControlCodes
@@ -54,7 +54,7 @@ object BossHPDisplays {
 
     @SubscribeEvent(receiveCanceled = true, priority = EventPriority.HIGHEST)
     fun onChat(event: ClientChatReceivedEvent) {
-        if (!Utils.inDungeons || event.type == 2.toByte()) return
+        if (!Utils.inDungeons || event.type.toInt() == 2) return
         val unformatted = event.message.unformattedText.stripControlCodes()
         if (unformatted.startsWith("[BOSS] Sadan")) {
             if (unformatted.contains("My giants! Unleashed!")) {
@@ -86,7 +86,12 @@ object BossHPDisplays {
             val hasSadanPlayer = mc.theWorld.getPlayerEntityByName("Sadan ") != null
             giantNames = mc.theWorld.loadedEntityList.filterIsInstance<EntityArmorStand>().filter {
                 val name = it.displayName.formattedText
-                name.contains("❤") && (!hasSadanPlayer && name.contains("§e﴾ §c§lSadan§r") || (name.contains("Giant") && dungeonFloorNumber?.let { it >= 6 } == true) || GiantHPElement.GIANT_NAMES.any {
+                name.contains("❤") && (!hasSadanPlayer && name.contains("§e﴾ §c§lSadan§r") || (name.contains("Giant") && Utils.equalsOneOf(
+                    DungeonFeatures.dungeonFloor,
+                    "F7",
+                    "M6",
+                    "M7"
+                )) || GiantHPElement.GIANT_NAMES.any {
                     name.contains(
                         it
                     )
@@ -95,7 +100,12 @@ object BossHPDisplays {
                 Pair(it.displayName.formattedText, it.positionVector.addVector(0.0, -10.0, 0.0))
             }
         } else giantNames = emptyList()
-        if (Skytils.config.showGuardianRespawnTimer && DungeonFeatures.hasBossSpawned && dungeonFloorNumber == 3 && mc.theWorld != null) {
+        if (Skytils.config.showGuardianRespawnTimer && DungeonFeatures.hasBossSpawned && Utils.equalsOneOf(
+                DungeonFeatures.dungeonFloor,
+                "M3",
+                "F3"
+            ) && mc.theWorld != null
+        ) {
             guardianRespawnTimers = mutableListOf<String>().apply {
                 for (entity in mc.theWorld.loadedEntityList) {
                     if (size >= 4) break

@@ -17,7 +17,6 @@
  */
 
 package gg.skytils.skytilsmod.gui.profile.components
-/*
 
 import gg.essential.elementa.components.UIContainer
 import gg.essential.elementa.components.Window
@@ -71,4 +70,4 @@ class HOTMComponent(val profileState: State<Member?>) : UIContainer() {
             }
         }
     }
-}*/
+}

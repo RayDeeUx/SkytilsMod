@@ -30,6 +30,7 @@ import gg.skytils.skytilsmod.utils.SkillUtils
 import gg.skytils.skytilsmod.utils.append
 import gg.skytils.skytilsmod.utils.formattedName
 import gg.skytils.skytilsmod.utils.setHoverText
+import skytils.hylin.request.HypixelAPIException
 import java.util.*
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -41,7 +42,7 @@ object CataCommand : StatCommand("skytilscata") {
     override fun displayStats(username: String, uuid: UUID, profileData: Member) {
         val playerResponse = try {
             API.getPlayerSync(uuid)
-        } catch (e: Throwable) {
+        } catch (e: HypixelAPIException) {
             printMessage(
                 "$failPrefix §cFailed to get dungeon stats: ${
                     e.message

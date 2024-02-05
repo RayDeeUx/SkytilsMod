@@ -54,7 +54,6 @@ import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.settings.KeyBinding
 import net.minecraft.entity.EntityLivingBase
-import net.minecraft.entity.boss.IBossDisplayData
 import net.minecraft.entity.effect.EntityLightningBolt
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.entity.item.EntityFallingBlock
@@ -80,7 +79,6 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent
 import net.minecraftforge.event.entity.living.EnderTeleportEvent
 import net.minecraftforge.event.entity.player.ItemTooltipEvent
 import net.minecraftforge.fml.common.Loader
-import net.minecraftforge.fml.common.eventhandler.Event
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
@@ -149,7 +147,7 @@ object MiscFeatures {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
     fun onChat(event: ClientChatReceivedEvent) {
-        if (!Utils.inSkyblock || event.type == 2.toByte()) return
+        if (!Utils.inSkyblock) return
         val unformatted = event.message.unformattedText.stripControlCodes().trim()
         val formatted = event.message.formattedText
         if (formatted.startsWith("§r§cYou died") && Skytils.config.preventMovingOnDeath) {
@@ -237,9 +235,7 @@ object MiscFeatures {
     @SubscribeEvent
     fun onCheckRender(event: CheckRenderEntityEvent<*>) {
         if (!Utils.inSkyblock) return
-        if (Skytils.config.bossBarFix && event.entity is IBossDisplayData && event.entity.isInvisible && event.entity.hasCustomName()) {
-            event.result = Event.Result.ALLOW
-        } else if (Skytils.config.hideDyingMobs && event.entity is EntityLivingBase && (event.entity.health <= 0 || event.entity.isDead)) {
+        if (Skytils.config.hideDyingMobs && event.entity is EntityLivingBase && (event.entity.health <= 0 || event.entity.isDead)) {
             event.isCanceled = true
         } else if (event.entity is EntityFallingBlock) {
             val entity = event.entity

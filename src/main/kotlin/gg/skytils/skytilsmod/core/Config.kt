@@ -464,13 +464,6 @@ object Config : Vigilant(
     var kismetRerollThreshold = 0
 
     @Property(
-        type = PropertyType.SWITCH, name = "Dungeon Secret Display",
-        description = "Shows the amount of dungeon secrets in the current room.",
-        category = "Dungeons", subcategory = "Quality of Life"
-    )
-    var dungeonSecretDisplay = false
-
-    @Property(
         type = PropertyType.SWITCH, name = "Ghost Leap Names",
         description = "Shows names next to the heads on the Ghost Leap menu.",
         category = "Dungeons", subcategory = "Quality of Life"
@@ -1009,10 +1002,10 @@ object Config : Vigilant(
 
     @Property(
         type = PropertyType.SWITCH, name = "Predict Clicks for Alignment Solver",
-        description = "Predict the amount of clicks needed on the alignment device in Floor 7.\nHighly recommended for high latency.",
+        description = "Predict the amount of clicks needed on the device in Floor 7.",
         category = "Dungeons", subcategory = "Terminal Solvers"
     )
-    var predictAlignmentClicks = true
+    var predictAlignmentClicks = false
 
     @Property(
         type = PropertyType.SWITCH, name = "Shoot the Target Solver",
@@ -1374,10 +1367,10 @@ object Config : Vigilant(
 
     @Property(
         type = PropertyType.SWITCH, name = "Boss Bar Fix",
-        description = "Attempts to stop boss bars from disappearing.",
+        description = "Hides the Witherborn boss bars.",
         category = "Miscellaneous", subcategory = "Fixes"
     )
-    var bossBarFix = false
+    var bossBarFix = true
 
     @Property(
         type = PropertyType.SWITCH, name = "Fix Falling Sand Rendering",
