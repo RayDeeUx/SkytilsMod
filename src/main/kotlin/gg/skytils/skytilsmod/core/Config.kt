@@ -464,6 +464,13 @@ object Config : Vigilant(
     var kismetRerollThreshold = 0
 
     @Property(
+        type = PropertyType.SWITCH, name = "Dungeon Secret Display",
+        description = "Shows the amount of dungeon secrets in the current room.",
+        category = "Dungeons", subcategory = "Quality of Life"
+    )
+    var dungeonSecretDisplay = false
+
+    @Property(
         type = PropertyType.SWITCH, name = "Ghost Leap Names",
         description = "Shows names next to the heads on the Ghost Leap menu.",
         category = "Dungeons", subcategory = "Quality of Life"
@@ -2234,6 +2241,27 @@ object Config : Vigilant(
     var fishingHookAge = false
 
     @Property(
+        type = PropertyType.SWITCH, name = "Tropy Fish Tracker",
+        description = "Tracks trophy fish caught.",
+        category = "Miscellaneous", subcategory = "Quality of Life"
+    )
+    var trophyFishTracker = false
+
+    @Property(
+        type = PropertyType.SWITCH, name = "Show Trophy Fish Totals",
+        description = "Shows totals of each trophy fish.",
+        category = "Miscellaneous", subcategory = "Quality of Life"
+    )
+    var showTrophyFishTotals = false
+
+    @Property(
+        type = PropertyType.SWITCH, name = "Show Total Trophy Fish",
+        description = "Shows the total of all trophy fish caught.",
+        category = "Miscellaneous", subcategory = "Quality of Life"
+    )
+    var showTotalTrophyFish = false
+
+    @Property(
         type = PropertyType.SWITCH, name = "Claim Own Auctions / Bazaar Orders Only",
         description = "Prevents claiming auctions or bazaar orders made by your co-op members.",
         category = "Miscellaneous", subcategory = "Quality of Life"
@@ -3062,6 +3090,9 @@ object Config : Vigilant(
 
         addDependency("assumeWitherImpact", "witherShieldCooldown")
 
+        addDependency("showTrophyFishTotals", "trophyFishTracker")
+        addDependency("showTotalTrophyFish", "trophyFishTracker")
+
         registerListener("protectItemBINThreshold") { _: String ->
             tickTimer(1) {
                 val numeric = protectItemBINThreshold.replace(Regex("[^0-9]"), "")
@@ -3071,8 +3102,13 @@ object Config : Vigilant(
             }
         }
 
-        registerListener("darkModeMist") { _: Boolean -> mc.renderGlobal.loadRenderers() }
-        registerListener("recolorCarpets") { _: Boolean -> mc.renderGlobal.loadRenderers() }
+        setOf(
+            "darkModeMist",
+            "gardenPlotCleanupHelper",
+            "recolorCarpets"
+        ).forEach { propertyName ->
+            registerListener(propertyName) { _: Boolean -> mc.renderGlobal.loadRenderers() }
+        }
 
         registerListener("itemRarityShape") { i: Int ->
             if (i == 4 && Loader.instance().hasReachedState(LoaderState.POSTINITIALIZATION)) {
