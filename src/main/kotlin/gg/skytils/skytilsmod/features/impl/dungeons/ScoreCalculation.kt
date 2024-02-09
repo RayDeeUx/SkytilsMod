@@ -25,12 +25,12 @@ import gg.skytils.skytilsmod.core.GuiManager
 import gg.skytils.skytilsmod.core.structure.GuiElement
 import gg.skytils.skytilsmod.core.tickTimer
 import gg.skytils.skytilsmod.events.impl.MainReceivePacketEvent
+import gg.skytils.skytilsmod.features.impl.dungeons.DungeonFeatures.dungeonFloorNumber
 import gg.skytils.skytilsmod.features.impl.handlers.MayorInfo
 import gg.skytils.skytilsmod.listeners.DungeonListener
 import gg.skytils.skytilsmod.mixins.transformers.accessors.AccessorChatComponentText
 import gg.skytils.skytilsmod.utils.*
 import gg.skytils.skytilsmod.utils.graphics.ScreenRenderer
-import gg.skytils.skytilsmod.utils.graphics.SmartFontRenderer
 import gg.skytils.skytilsmod.utils.graphics.SmartFontRenderer.TextAlignment
 import gg.skytils.skytilsmod.utils.graphics.colors.CommonColors
 import net.minecraft.entity.monster.EntityZombie
@@ -279,7 +279,7 @@ object ScoreCalculation {
                             if (floorReq.get().secretPercentage != 1.0) "§7(§6Total: ${totalSecrets.get()}§7)" else ""
                 )
                 ScoreCalculationElement.text.add("§f• §eCrypts:§a ${crypts.get()}")
-                if (Utils.equalsOneOf(DungeonFeatures.dungeonFloor, "F6", "F7", "M6", "M7")) {
+                if (dungeonFloorNumber?.let { it >= 6 } == true) {
                     ScoreCalculationElement.text.add("§f• §eMimic:§l${if (mimicKilled.get()) "§a ✔" else "§c ✘"}")
                 }
                 ScoreCalculationElement.text.add("")
@@ -325,11 +325,15 @@ object ScoreCalculation {
         if (line.startsWith("Cleared: ")) {
             val matcher = dungeonClearedPattern.find(line)
             if (matcher != null) {
+                if (DungeonTimer.dungeonStartTime == -1L)
+                    DungeonTimer.dungeonStartTime = System.currentTimeMillis()
                 clearedPercentage.set(matcher.groups["percentage"]?.value?.toIntOrNull() ?: 0)
                 return
             }
         }
         if (line.startsWith("Time Elapsed:")) {
+            if (DungeonTimer.dungeonStartTime == -1L)
+                DungeonTimer.dungeonStartTime = System.currentTimeMillis()
             val matcher = timeElapsedPattern.find(line)
             if (matcher != null) {
                 val hours = matcher.groups["hrs"]?.value?.toIntOrNull() ?: 0
@@ -432,7 +436,7 @@ object ScoreCalculation {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
     fun onChatReceived(event: ClientChatReceivedEvent) {
-        if (!Utils.inDungeons || mc.thePlayer == null) return
+        if (!Utils.inDungeons || mc.thePlayer == null || event.type == 2.toByte()) return
         val unformatted = event.message.unformattedText.stripControlCodes()
         if (Skytils.config.scoreCalculationReceiveAssist) {
             if (unformatted.startsWith("Party > ") || (unformatted.contains(":") && !unformatted.contains(">"))) {

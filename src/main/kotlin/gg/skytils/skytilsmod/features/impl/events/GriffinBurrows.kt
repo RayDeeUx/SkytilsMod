@@ -61,9 +61,10 @@ object GriffinBurrows {
 
     @SubscribeEvent(receiveCanceled = true, priority = EventPriority.HIGHEST)
     fun onChat(event: ClientChatReceivedEvent) {
+        if (event.type == 2.toByte()) return
         val unformatted = event.message.unformattedText.stripControlCodes()
         if (Skytils.config.showGriffinBurrows &&
-            (unformatted.startsWith("You died") ||
+            (unformatted.startsWith("You died") || unformatted.startsWith("☠ You were killed") ||
                     unformatted.startsWith("You dug out a Griffin Burrow! (") ||
                     unformatted == "You finished the Griffin burrow chain! (4/4)")
         ) {
