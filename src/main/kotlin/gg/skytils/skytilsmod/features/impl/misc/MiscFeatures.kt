@@ -397,8 +397,9 @@ object MiscFeatures {
             }
         } else if (bzAHTitleRegex.matches(chestName) && Skytils.config.claimOwnAHBZOnly) {
             for (line in ItemUtil.getItemLore(item)) {
-                if (bzAHAuthorRegex.matches(line.stripControlCodes())) {
-                    val matches = bzAHAuthorRegex.find(line) ?: return
+                val lineNoCodes = line.stripControlCodes()
+                if (bzAHAuthorRegex.matches(lineNoCodes)) {
+                    val matches = bzAHAuthorRegex.find(lineNoCodes) ?: return
                     if (matches.groups["username"]?.value != mc.thePlayer.name) {
                         event.isCanceled = true
                         return
